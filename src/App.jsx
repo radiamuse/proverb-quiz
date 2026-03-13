@@ -56,7 +56,7 @@ function ChoiceCard({ choice, index, selected, disabled, onSelect }) {
     <button
       onClick={() => !disabled && onSelect(choice)}
       disabled={disabled}
-      className={`flex flex-col items-center justify-between py-5 px-3 rounded-2xl border-2 transition-all flex-1 min-h-[140px] ${
+      className={`flex flex-col items-center justify-between py-5 px-3 rounded-2xl border-2 transition-all flex-1 min-h-[300px] ${
         disabled
           ? 'cursor-default'
           : 'cursor-pointer hover:border-violet-300 active:scale-95'
@@ -97,8 +97,112 @@ function ChoiceCard({ choice, index, selected, disabled, onSelect }) {
   )
 }
 
+// ── ログイン画面 ──────────────────────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+  const [name, setName] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const trimmed = name.trim()
+    if (!trimmed) return
+    localStorage.setItem('proverb_quiz_user', trimmed)
+    onLogin(trimmed)
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      <div className="text-center mb-10">
+        <div className="text-6xl mb-5">📜</div>
+        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">
+          ことわざ<span className="text-violet-600">クイズ</span>
+        </h1>
+        <p className="text-gray-400 text-sm mt-2">まずニックネームを入力してください</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="ニックネーム"
+          maxLength={12}
+          autoFocus
+          className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-base placeholder-gray-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
+        />
+        <button
+          type="submit"
+          disabled={!name.trim()}
+          className={`w-full py-4 rounded-2xl font-black text-lg transition-all ${
+            name.trim()
+              ? 'bg-violet-600 text-white hover:bg-violet-500 active:scale-95 shadow-lg shadow-violet-200'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          はじめる
+        </button>
+      </form>
+    </div>
+  )
+}
+
+// ── 対決セットアップ画面 ───────────────────────────────────────────────────────
+function VersusSetupScreen({ player1Name, onStart, onBack }) {
+  const [p2Name, setP2Name] = useState('')
+
+  const handleStart = (e) => {
+    e.preventDefault()
+    const trimmed = p2Name.trim()
+    if (!trimmed) return
+    onStart(trimmed)
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      <div className="text-center mb-10">
+        <div className="text-5xl mb-4">⚔️</div>
+        <h2 className="text-3xl font-black text-gray-900 mb-2">対決モード</h2>
+        <p className="text-gray-400 text-sm">対戦相手のニックネームを入力してください</p>
+      </div>
+
+      <div className="w-full max-w-sm mb-6">
+        <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-2">
+          <span className="text-blue-500 text-sm font-bold w-16 flex-shrink-0">あなた</span>
+          <span className="text-gray-900 font-bold">{player1Name}</span>
+        </div>
+        <div className="text-center text-gray-300 text-sm my-3">vs</div>
+        <form onSubmit={handleStart} className="flex flex-col gap-4">
+          <input
+            type="text"
+            value={p2Name}
+            onChange={e => setP2Name(e.target.value)}
+            placeholder="対戦相手のニックネーム"
+            maxLength={12}
+            autoFocus
+            className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-base placeholder-gray-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
+          />
+          <button
+            type="submit"
+            disabled={!p2Name.trim()}
+            className={`w-full py-4 rounded-2xl font-black text-lg transition-all ${
+              p2Name.trim()
+                ? 'bg-violet-600 text-white hover:bg-violet-500 active:scale-95 shadow-lg shadow-violet-200'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            対決開始！
+          </button>
+        </form>
+      </div>
+
+      <button onClick={onBack} className="text-gray-400 text-sm hover:text-gray-600 transition-colors">
+        ← ホームに戻る
+      </button>
+    </div>
+  )
+}
+
 // ── ホーム画面 ────────────────────────────────────────────────────────────────
-function HomeScreen({ onSolo, onVersus }) {
+function HomeScreen({ username, onSolo, onVersus, onLogout }) {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
       <div className="text-center mb-14">
@@ -106,7 +210,9 @@ function HomeScreen({ onSolo, onVersus }) {
         <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">
           ことわざ<span className="text-violet-600">クイズ</span>
         </h1>
-        <p className="text-gray-400 text-sm mt-2">意味から、正しい言葉を当てよう</p>
+        <p className="text-gray-500 text-sm mt-2">
+          こんにちは、<span className="font-bold text-gray-700">{username}</span> さん
+        </p>
       </div>
 
       <div className="w-full max-w-sm flex flex-col gap-4">
@@ -129,13 +235,20 @@ function HomeScreen({ onSolo, onVersus }) {
         <p className="text-center text-gray-400 text-xs mt-2">
           対決モードは2人で1台のデバイスを使います
         </p>
+
+        <button
+          onClick={onLogout}
+          className="text-gray-400 text-xs text-center mt-2 hover:text-gray-600 transition-colors"
+        >
+          ログアウト
+        </button>
       </div>
     </div>
   )
 }
 
 // ── 対決：出題画面 ─────────────────────────────────────────────────────────────
-function VersusDeceiverScreen({ gameState, dummyInput, dummyError, onDummyChange, onSubmit, maxTurns }) {
+function VersusDeceiverScreen({ gameState, players, dummyInput, dummyError, onDummyChange, onSubmit, maxTurns }) {
   const { currentProverb, turnCount, scoreGuesser, scoreDeceiver } = gameState
 
   return (
@@ -145,10 +258,10 @@ function VersusDeceiverScreen({ gameState, dummyInput, dummyError, onDummyChange
         <span className="text-gray-400 text-sm">ターン {turnCount} / {maxTurns}</span>
         <div className="flex gap-2">
           <span className="text-blue-600 text-xs bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
-            解答者 {scoreGuesser}pt
+            {players.guesser} {scoreGuesser}pt
           </span>
           <span className="text-violet-600 text-xs bg-white border border-violet-200 px-2.5 py-1 rounded-full">
-            出題者 {scoreDeceiver}pt
+            {players.deceiver} {scoreDeceiver}pt
           </span>
         </div>
       </div>
@@ -157,8 +270,8 @@ function VersusDeceiverScreen({ gameState, dummyInput, dummyError, onDummyChange
       <div className="bg-white border border-violet-200 rounded-2xl px-5 py-4 mb-5 flex items-center gap-3 shadow-sm">
         <span className="text-2xl">🎭</span>
         <div>
-          <p className="text-violet-700 font-bold text-sm">出題者のターンです</p>
-          <p className="text-violet-400 text-xs mt-0.5">解答者には画面を見せないでください</p>
+          <p className="text-violet-700 font-bold text-sm">{players.deceiver} のターンです（出題者）</p>
+          <p className="text-violet-400 text-xs mt-0.5">{players.guesser} には画面を見せないでください</p>
         </div>
       </div>
 
@@ -211,13 +324,13 @@ function VersusDeceiverScreen({ gameState, dummyInput, dummyError, onDummyChange
 }
 
 // ── 対決：待機画面 ────────────────────────────────────────────────────────────
-function VersusWaitingScreen({ onReady }) {
+function VersusWaitingScreen({ players, onReady }) {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
       <div className="text-8xl mb-8 animate-bounce">📱</div>
-      <h2 className="text-gray-900 text-2xl font-black mb-3">解答者にデバイスを渡してください</h2>
+      <h2 className="text-gray-900 text-2xl font-black mb-3">{players.guesser} にデバイスを渡してください</h2>
       <p className="text-gray-400 text-base leading-relaxed mb-12">
-        準備ができたら解答者が<br />「準備完了」を押してください
+        準備ができたら {players.guesser} が<br />「準備完了」を押してください
       </p>
       <button
         onClick={onReady}
@@ -225,13 +338,13 @@ function VersusWaitingScreen({ onReady }) {
       >
         準備完了！
       </button>
-      <p className="text-gray-300 text-xs mt-6">※ 出題者は画面を見ないでください</p>
+      <p className="text-gray-300 text-xs mt-6">※ {players.deceiver} は画面を見ないでください</p>
     </div>
   )
 }
 
 // ── 対決：解答画面 ────────────────────────────────────────────────────────────
-function VersusGuesserScreen({ gameState, pendingChoice, onSelect, onConfirm }) {
+function VersusGuesserScreen({ gameState, players, pendingChoice, onSelect, onConfirm }) {
   const { currentProverb, choices, scoreGuesser, scoreDeceiver } = gameState
 
   return (
@@ -239,14 +352,14 @@ function VersusGuesserScreen({ gameState, pendingChoice, onSelect, onConfirm }) 
       {/* ヘッダー */}
       <div className="flex justify-between items-center mb-5 pt-2">
         <div className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-          解答者のターン
+          {players.guesser} のターン
         </div>
         <div className="flex gap-2">
           <span className="text-blue-600 text-xs bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
-            あなた {scoreGuesser}pt
+            {players.guesser} {scoreGuesser}pt
           </span>
           <span className="text-violet-600 text-xs bg-violet-50 border border-violet-100 px-2.5 py-1 rounded-full">
-            出題者 {scoreDeceiver}pt
+            {players.deceiver} {scoreDeceiver}pt
           </span>
         </div>
       </div>
@@ -293,27 +406,27 @@ function VersusGuesserScreen({ gameState, pendingChoice, onSelect, onConfirm }) 
 }
 
 // ── 対決：結果画面 ────────────────────────────────────────────────────────────
-function VersusResultScreen({ gameState, maxTurns, onNext }) {
+function VersusResultScreen({ gameState, players, maxTurns, onNext }) {
   const { currentProverb, dummyWord, lastResult, scoreGuesser, scoreDeceiver, turnCount } = gameState
 
   const configs = {
     correct: {
       emoji: '✅',
       title: '正解！',
-      subtitle: '解答者が正解を当てた！',
+      subtitle: `${players.guesser} が正解を当てた！`,
       titleColor: 'text-emerald-700',
       bg: 'bg-emerald-50 border-emerald-200',
       badgeBg: 'bg-emerald-100 text-emerald-700',
-      points: '+10pt → 解答者',
+      points: `+10pt → ${players.guesser}`,
     },
     dummy: {
       emoji: '🎭',
       title: 'だまされた！',
-      subtitle: '出題者のダミーに引っかかった…',
+      subtitle: `${players.deceiver} のダミーに引っかかった…`,
       titleColor: 'text-violet-700',
       bg: 'bg-violet-50 border-violet-200',
       badgeBg: 'bg-violet-100 text-violet-700',
-      points: '+15pt → 出題者（騙し成功ボーナス！）',
+      points: `+15pt → ${players.deceiver}（騙し成功ボーナス！）`,
     },
     random: {
       emoji: '😅',
@@ -322,7 +435,7 @@ function VersusResultScreen({ gameState, maxTurns, onNext }) {
       titleColor: 'text-gray-600',
       bg: 'bg-gray-50 border-gray-300',
       badgeBg: 'bg-gray-100 text-gray-600',
-      points: '解答者 -5pt',
+      points: `${players.guesser} -5pt`,
     },
   }
 
@@ -355,7 +468,7 @@ function VersusResultScreen({ gameState, maxTurns, onNext }) {
             🎭 ダミー
           </span>
           <span className="text-gray-700 font-bold">{dummyWord}</span>
-          <span className="text-gray-400 text-xs">（出題者が作成）</span>
+          <span className="text-gray-400 text-xs">（{players.deceiver} が作成）</span>
         </div>
       </div>
 
@@ -365,12 +478,12 @@ function VersusResultScreen({ gameState, maxTurns, onNext }) {
         <div className="flex justify-around items-end">
           <div className="text-center">
             <p className="text-blue-600 text-4xl font-black">{scoreGuesser}</p>
-            <p className="text-gray-400 text-xs mt-1">解答者</p>
+            <p className="text-gray-400 text-xs mt-1">{players.guesser}</p>
           </div>
           <div className="text-gray-300 text-xl mb-1">vs</div>
           <div className="text-center">
             <p className="text-violet-600 text-4xl font-black">{scoreDeceiver}</p>
-            <p className="text-gray-400 text-xs mt-1">出題者</p>
+            <p className="text-gray-400 text-xs mt-1">{players.deceiver}</p>
           </div>
         </div>
       </div>
@@ -389,18 +502,19 @@ function VersusResultScreen({ gameState, maxTurns, onNext }) {
 }
 
 // ── 対決：最終結果画面 ─────────────────────────────────────────────────────────
-function VersusFinalScreen({ gameState, onHome, onRestart }) {
+function VersusFinalScreen({ gameState, players, onHome, onRestart }) {
   const { scoreGuesser, scoreDeceiver } = gameState
   const guesserWins = scoreGuesser > scoreDeceiver
   const isDraw = scoreGuesser === scoreDeceiver
+  const winner = isDraw ? null : (guesserWins ? players.guesser : players.deceiver)
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
       <div className="text-6xl mb-4">
-        {isDraw ? '🤝' : guesserWins ? '🏆' : '🎭'}
+        {isDraw ? '🤝' : '🏆'}
       </div>
       <h2 className="text-gray-900 text-3xl font-black mb-2 text-center">
-        {isDraw ? '引き分け！' : guesserWins ? '解答者の勝利！' : '出題者の勝利！'}
+        {isDraw ? '引き分け！' : `${winner} の勝利！`}
       </h2>
       <p className="text-gray-400 text-sm mb-10 text-center">
         {isDraw ? '互角の知力戦でした' : guesserWins ? '正確な知識で全てを見破った！' : '巧みなダミーで解答者を翻弄した！'}
@@ -413,7 +527,7 @@ function VersusFinalScreen({ gameState, onHome, onRestart }) {
             <div className={`text-5xl font-black mb-1 ${guesserWins ? 'text-yellow-500' : 'text-blue-500'}`}>
               {scoreGuesser}
             </div>
-            <p className="text-gray-500 text-sm">解答者</p>
+            <p className="text-gray-500 text-sm">{players.guesser}</p>
             {guesserWins && <p className="text-yellow-500 text-xs mt-1 font-bold">👑 WIN</p>}
             {isDraw && <p className="text-gray-400 text-xs mt-1">DRAW</p>}
           </div>
@@ -422,7 +536,7 @@ function VersusFinalScreen({ gameState, onHome, onRestart }) {
             <div className={`text-5xl font-black mb-1 ${!guesserWins && !isDraw ? 'text-yellow-500' : 'text-violet-500'}`}>
               {scoreDeceiver}
             </div>
-            <p className="text-gray-500 text-sm">出題者</p>
+            <p className="text-gray-500 text-sm">{players.deceiver}</p>
             {!guesserWins && !isDraw && <p className="text-yellow-500 text-xs mt-1 font-bold">👑 WIN</p>}
             {isDraw && <p className="text-gray-400 text-xs mt-1">DRAW</p>}
           </div>
@@ -540,7 +654,7 @@ function SoloQuizScreen({ gameState, selectedChoice, pendingChoice, onSelect, on
               return (
                 <div
                   key={idx}
-                  className={`flex flex-col items-center justify-between py-5 px-3 rounded-2xl border-2 flex-1 min-h-[140px] ${borderCls} ${bgCls}`}
+                  className={`flex flex-col items-center justify-between py-5 px-3 rounded-2xl border-2 flex-1 min-h-[300px] ${borderCls} ${bgCls}`}
                 >
                   <span className={`text-xs font-bold mb-2 ${labelCls}`}>
                     {String.fromCharCode(65 + idx)}
@@ -594,7 +708,9 @@ function SoloQuizScreen({ gameState, selectedChoice, pendingChoice, onSelect, on
 
 // ── メインアプリ ──────────────────────────────────────────────────────────────
 export default function App() {
+  const [username, setUsername] = useState(() => localStorage.getItem('proverb_quiz_user') ?? '')
   const [screen, setScreen] = useState('home')
+  const [players, setPlayers] = useState({ guesser: '', deceiver: '' })
   const [gameState, setGameState] = useState({
     currentMode: 'none',
     turnCount: 0,
@@ -609,11 +725,25 @@ export default function App() {
   })
   const [dummyInput, setDummyInput] = useState('')
   const [dummyError, setDummyError] = useState('')
-  const [selectedChoice, setSelectedChoice] = useState(null)  // 確定済み回答
-  const [pendingChoice, setPendingChoice] = useState(null)    // チェック中（未確定）
+  const [selectedChoice, setSelectedChoice] = useState(null)
+  const [pendingChoice, setPendingChoice] = useState(null)
+
+  const handleLogin = (name) => {
+    setUsername(name)
+    setScreen('home')
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('proverb_quiz_user')
+    setUsername('')
+    setScreen('home')
+  }
 
   // ── 対決モード ────────────────────────────────────────────────────────────
-  const startVersus = () => {
+  const startVersus = (p2Name) => {
+    const guesser = username
+    const deceiver = p2Name
+    setPlayers({ guesser, deceiver })
     const proverb = pickRandom()
     setGameState({
       currentMode: 'versus',
@@ -736,14 +866,26 @@ export default function App() {
   }
 
   // ── レンダー ──────────────────────────────────────────────────────────────
+  if (!username) {
+    return <LoginScreen onLogin={handleLogin} />
+  }
+
   return (
     <div className="min-h-screen">
       {screen === 'home' && (
-        <HomeScreen onSolo={startSolo} onVersus={startVersus} />
+        <HomeScreen username={username} onSolo={startSolo} onVersus={() => setScreen('versus_setup')} onLogout={handleLogout} />
+      )}
+      {screen === 'versus_setup' && (
+        <VersusSetupScreen
+          player1Name={username}
+          onStart={startVersus}
+          onBack={() => setScreen('home')}
+        />
       )}
       {screen === 'versus_deceiver' && (
         <VersusDeceiverScreen
           gameState={gameState}
+          players={players}
           dummyInput={dummyInput}
           dummyError={dummyError}
           onDummyChange={v => { setDummyInput(v); setDummyError('') }}
@@ -752,24 +894,26 @@ export default function App() {
         />
       )}
       {screen === 'versus_waiting' && (
-        <VersusWaitingScreen onReady={() => setScreen('versus_guesser')} />
+        <VersusWaitingScreen players={players} onReady={() => setScreen('versus_guesser')} />
       )}
       {screen === 'versus_guesser' && (
         <VersusGuesserScreen
           gameState={gameState}
+          players={players}
           pendingChoice={pendingChoice}
           onSelect={setPendingChoice}
           onConfirm={confirmVersusAnswer}
         />
       )}
       {screen === 'versus_result' && (
-        <VersusResultScreen gameState={gameState} maxTurns={MAX_TURNS} onNext={nextVersusTurn} />
+        <VersusResultScreen gameState={gameState} players={players} maxTurns={MAX_TURNS} onNext={nextVersusTurn} />
       )}
       {screen === 'versus_final' && (
         <VersusFinalScreen
           gameState={gameState}
+          players={players}
           onHome={() => setScreen('home')}
-          onRestart={startVersus}
+          onRestart={() => setScreen('versus_setup')}
         />
       )}
       {screen === 'solo_quiz' && (
